@@ -5,15 +5,17 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 """
 # Django imports
 from django.conf.urls import include, url
+from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-
+from . import views
 from django.contrib.auth.views import LoginView, LogoutView
 
 
 urlpatterns = [
     # Examples:
     # url(r'^blog/', include('blog.urls', namespace='blog')),
+    path('', views.index, name='index'),
     
     url(r'^login/$', LoginView.as_view(template_name='core/login.html'), name='core_login'),
     url(r'^logout/$', LogoutView.as_view(), name='core_logout'),

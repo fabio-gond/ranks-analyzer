@@ -45,6 +45,9 @@ DEFAULT_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Local
+    'users.apps.UsersConfig',
 ]
 
 # Middlewares
@@ -65,6 +68,7 @@ TEMPLATES = [
         'DIRS': PROJECT_TEMPLATES,
         'APP_DIRS': True,
         'OPTIONS': {
+            'builtins': ['templatetags.extra_tags'],
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',

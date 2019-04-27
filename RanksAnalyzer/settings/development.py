@@ -19,6 +19,9 @@ LOGIN_URL = 'core_login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'core_login'
 
+# Per una autenticazione personalizzata (via email e non username)
+AUTH_USER_MODEL = 'users.CustomUser'
+
 
 # ##### DATABASE CONFIGURATION ############################
 DATABASES = {
