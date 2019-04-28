@@ -19,6 +19,7 @@ urlpatterns = [
     
     url(r'^login/$', LoginView.as_view(template_name='core/login.html'), name='core_login'),
     url(r'^logout/$', LogoutView.as_view(), name='core_logout'),
+    path('accounts/', include('allauth.urls')),
     
     #url(r'account/', include('django.contrib.auth.urls')),
 

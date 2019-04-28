@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 
 def index(request):
     if not request.user.is_authenticated:
-         return redirect('core_login')
+         return redirect('account_login')
 
     template = 'index.html'
     context = {}

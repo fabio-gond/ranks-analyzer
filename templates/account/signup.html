@@ -1,0 +1,105 @@
+<!-- <h2>Sign Up</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Sign Up</button>
+</form> -->
+
+{% load static %}
+{% load socialaccount %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{% trans "Sign Up" %}</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link href="{% static 'login/login.css' %}?{% cache_bust %}" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+        <div class="card card-signin my-5">
+          <div class="card-body">
+            <h5 class="card-title text-center">{% trans "Sign Up" %}</h5>
+            <form class="form-signin" method="post" onsubmit="return checkForm()">
+              {% csrf_token %}
+              <!-- {{ form.as_p }} -->
+              {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+              
+              {% if form.errors %}
+              {% for field in form %}
+              {% for error in field.errors %}
+              <div class="alert alert-error" style="color:red; text-align:center;">
+                <span><b> {{error}} </b><span>
+              </div>
+              {% endfor %}
+              {% endfor %}
+              {% endif %}
+              <p style="color:red; text-align:center; padding-top: 10px" id="errorMessage"></p>
+
+              <div class="form-label-group">
+                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address"
+                  required autofocus>
+                <label for="inputEmail">Email address</label>
+              </div>
+
+              <div class="form-label-group">
+                <input type="password" name="password1" id="inputPassword" class="form-control" placeholder="Password"
+                  required>
+                <label for="inputPassword">Password</label>
+              </div>
+
+              <div class="form-label-group">
+                <input type="password" name="password2" id="inputPasswordRepeat" class="form-control"
+                  placeholder="Password" required>
+                <label for="inputPasswordRepeat">Ripeti Password</label>
+              </div>
+
+              <div class="custom-control custom-checkbox mb-3">
+                <input type="checkbox" class="custom-control-input" id="customCheck1">
+                <label class="custom-control-label" for="customCheck1">Ricorda password</label>
+              </div>
+              <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Registrati</button>
+              <p style="text-align:center; padding-top: 12px;">Hai già un account? <a href="{{ login_url }}">Accedi</a>
+              </p>
+              <hr class="my-4">
+              <a href="{% provider_login_url 'google' %}" target="blank" class="button">
+                <button style="margin-bottom: 12px;" class="btn btn-lg btn-google btn-block text-uppercase"
+                  type="button"><i class="fab fa-google mr-2"></i> Accedi con Google</button>
+              </a>
+              <a href="{% provider_login_url 'facebook' %}" class="button">
+                <button class="btn btn-lg btn-facebook btn-block text-uppercase" type="submit"><i
+                    class="fab fa-facebook-f mr-2"></i> Accedi con Facebook</button>
+              </a>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+
+    checkForm = () => {
+      pass1 = document.getElementById("inputPassword").value
+      pass2 = document.getElementById("inputPasswordRepeat").value
+
+      if (pass1 != pass2) {
+        document.getElementById("errorMessage").textContent = "Le 2 password non corrispondono"
+        return false
+      }
+      return true
+    }
+  </script>
+</body>
+
+</html>
