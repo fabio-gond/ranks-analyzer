@@ -10,3 +10,11 @@ def index(request):
     template = 'index.html'
     context = {}
     return render(request, template, context)
+
+def account(request):
+    if not request.user.is_authenticated:
+         return redirect('account_login')
+
+    template = 'index.html'
+    context = {}
+    return render(request, template, context)
