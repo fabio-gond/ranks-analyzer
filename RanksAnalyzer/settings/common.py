@@ -49,13 +49,25 @@ AUTHENTICATION_BACKENDS = (
 
 SITE_ID = 1
 
+# Auth
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = None
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'mandatory' #'none'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 SOCIALACCOUNT_QUERY_EMAIL = True
+
+# E-mail
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465 #587
+EMAIL_HOST_USER = DEFAULT_FROM_EMAIL = 'Febio <info.febio@gmail.com>'
+EMAIL_HOST_PASSWORD = 'Osvaldo1988@'
 #---------------------------------------------------------
 
 
@@ -77,10 +89,16 @@ DEFAULT_APPS = [
     'allauth.socialaccount', 
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
+    'crispy_forms',
 
     # Local
     'users.apps.UsersConfig',
+    'analyze.apps.AnalyzeConfig',
 ]
+
+# Crispy Forms
+# https://simpleisbetterthancomplex.com/tutorial/2018/11/28/advanced-form-rendering-with-django-crispy-forms.html
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Middlewares
 MIDDLEWARE = [

@@ -1,0 +1,338 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Account Inactive" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        
+        <div class="col-lg-3 mb-3">
+        <ul id="account-nav" class="nav nav-tabs flex-lg-column" role="tablist">
+            <li class="nav-item">
+            <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="true">Your Profile</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" id="password-tab" data-toggle="tab" href="#password" role="tab" aria-controls="password" aria-selected="false">Password</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" id="notifications-tab" data-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="false">Email Notifications</a>
+            </li>
+            <li class="nav-item">
+            <a class="nav-link" id="billing-tab" data-toggle="tab" href="#billing" role="tab" aria-controls="billing" aria-selected="false">Billing Details</a>
+            </li>
+        </ul>
+        </div>
+
+        <div class="col-xl-8 col-lg-9">
+        {% for alert in alerts %}
+            <div class="alert alert-{{ alert.type }}" role="alert">{{alert.text}}</div>
+        {% endfor %}
+        <div class="card">
+            <div class="card-body">
+            <div class="tab-content">
+                <!-- PROFILE TAB -->
+                <div class="tab-pane fade show active" role="tabpanel" id="profile">
+                
+                <form method="POST">
+                    <input type="hidden" name="action" value="update-account-info">
+                    <!-- {{ accountInfoForm|crispy}} -->
+                    {% crispy accountInfoForm %}
+                    <!-- <div class="form-group row align-items-center">
+                        {{ accountInfoForm.first_name|as_crispy_field}}
+                    <label class="col-3">First Name</label>
+                    <div class="col">
+                        <input type="text" placeholder="First name" value="{{ user.first_name }}" name="profile-first-name" autocomplete="family-name" class="form-control" required />
+                    </div> 
+                    </div>
+                    <div class="form-group row align-items-center">
+                    <label class="col-3">Last Name</label>
+                    <div class="col">
+                        <input type="text" placeholder="Last name" value="{{ user.last_name }}" name="profile-last-name" autocomplete="family-name" class="form-control" />
+                    </div>
+                    </div>
+                    <div class="form-group row align-items-center">
+                    <label class="col-3">Email</label>
+                    <div class="col">
+                        <input type="email" placeholder="Enter your email address" value="{{ user.email }}" autocomplete="email" name="profile-email" class="form-control" required />
+                    </div>
+                    </div>
+                    
+                    <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-primary">Save</button> 
+                    </div> -->
+                </form>
+                </div>
+                <!-- https://github.com/pennersr/django-allauth/blob/c19a212c6ee786af1bb8bc1b07eb2aa8e2bf531b/allauth/account/forms.py#L454 -->
+                <!-- PASSWORD TAB --> <!-- fdsa -->
+                <div class="tab-pane fade" role="tabpanel" id="password" class="password_set">
+                <form method="POST" action="{% url 'account_change_password' %}" onsubmit="return checkPassword(this)">
+                    {% csrf_token %}
+                    <div class="form-group row align-items-center">
+                    <label class="col-3">Current Password</label>
+                    <div class="col">
+                        {% if user.password is not None %}
+                        <input type="password" placeholder="Enter your current password" name="oldpassword" id="oldpassword" class="form-control" autocomplete="current-password" required />
+                        {% else %}
+                        <span>Password not set yet</span>
+                        <input type="hidden" name="oldpassword" value="" />
+                        {% endif %}
+                    </div>
+                    </div>
+                    <div class="form-group row align-items-center">
+                    <label class="col-3">New Password</label>
+                    <div class="col">
+                        <input type="password" minlength="8" maxlength="32" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="Enter a new password" name="password1" id="newPassword1" autocomplete="new-password" class="form-control" required />
+                        <small>Password must be at least 8 characters long</small>
+                    </div>
+                    </div>
+                    <div class="form-group row align-items-center">
+                    <label class="col-3">Confirm Password</label>
+                    <div class="col">
+                        <input type="password" minlength="8" maxlength="32" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="Confirm your new password" name="password2" id="newPassword2"  class="form-control" required />
+                    </div>
+                    </div>
+                    <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                    </div>
+                </form>
+                </div>
+
+                <!-- NOTIFICATIONS TAB -->
+                <div class="tab-pane fade" role="tabpanel" id="notifications">
+                <form>
+                    <h6>Activity Notifications</h6>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-1" checked>
+                        <label class="custom-control-label" for="notify-1">Someone assigns me to a task</label>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-2" checked>
+                        <label class="custom-control-label" for="notify-2">Someone mentions me in a conversation</label>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-3" checked>
+                        <label class="custom-control-label" for="notify-3">Someone adds me to a project</label>
+                    </div>
+                    </div>
+                    <div class="form-group mb-md-4">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-4">
+                        <label class="custom-control-label" for="notify-4">Activity on a project I am a member of</label>
+                    </div>
+                    </div>
+                    <h6>Service Notifications</h6>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-5">
+                        <label class="custom-control-label" for="notify-5">Monthly newsletter</label>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-6" checked>
+                        <label class="custom-control-label" for="notify-6">Major feature enhancements</label>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <div class="custom-control custom-checkbox custom-checkbox-switch">
+                        <input type="checkbox" class="custom-control-input" id="notify-7">
+                        <label class="custom-control-label" for="notify-7">Minor updates and bug fixes</label>
+                    </div>
+                    </div>
+                    <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-primary">Save preferences</button>
+                    </div>
+                </form>
+                </div>
+
+                <!-- BILLING TAB -->
+                <div class="tab-pane fade" role="tabpanel" id="billing">
+                <form>
+                    <h6>Plan Details</h6>
+                    <div class="card text-center">
+                    <div class="card-body">
+                        <div class="row">
+                        <div class="col">
+                            <div class="mb-4">
+                            <h6>Free</h6>
+                            <h5 class="display-4 d-block mb-2 font-weight-normal">$0</h5>
+                            <span class="text-muted text-small">Per User / Per Month</span>
+                            </div>
+                            <ul class="list-unstyled">
+                            <li>
+                                Unlimited projects
+                            </li>
+                            <li>
+                                1 team
+                            </li>
+                            <li>
+                                4 team members
+                            </li>
+                            </ul>
+                            <div class="custom-control custom-radio d-inline-block">
+                            <input type="radio" id="plan-radio-1" name="customRadio" class="custom-control-input">
+                            <label class="custom-control-label" for="plan-radio-1"></label>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="mb-4">
+                            <h6>Pro</h6>
+                            <h5 class="display-4 d-block mb-2 font-weight-normal">$10</h5>
+                            <span class="text-muted text-small">Per User / Per Month</span>
+                            </div>
+                            <ul class="list-unstyled">
+                            <li>
+                                Unlimited projects
+                            </li>
+                            <li>
+                                Unlmited teams
+                            </li>
+                            <li>
+                                Unlimited team members
+                            </li>
+                            </ul>
+                            <div class="custom-control custom-radio d-inline-block">
+                            <input type="radio" id="plan-radio-2" name="customRadio" class="custom-control-input" checked>
+                            <label class="custom-control-label" for="plan-radio-2"></label>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </form>
+                <form class="mt-4">
+                    <h6>Payment Method</h6>
+
+                    <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="custom-control custom-radio d-inline-block">
+                            <input type="radio" id="method-radio-1" name="payment-method" class="custom-control-input" checked>
+                            <label class="custom-control-label" for="method-radio-1"></label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <img alt="Image" src="assets/img/logo-payment-visa.svg" class="avatar rounded-0" />
+                        </div>
+                        <div class="col d-flex align-items-center">
+                            <span>•••• •••• •••• 8372</span>
+                            <small class="ml-2">Exp: 06/21</small>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-danger">
+                            Remove Card
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="custom-control custom-radio d-inline-block">
+                            <input type="radio" id="method-radio-2" name="payment-method" class="custom-control-input">
+                            <label class="custom-control-label" for="method-radio-2"></label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <img alt="Image" src="assets/img/logo-payment-amex.svg" class="avatar rounded-0" />
+                        </div>
+                        <div class="col d-flex align-items-center">
+                            <span>•••• •••• •••• 9918</span>
+                            <small class="ml-2">Exp: 02/20</small>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-danger">
+                            Remove Card
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="custom-control custom-radio d-inline-block">
+                            <input type="radio" id="method-radio-3" name="payment-method" class="custom-control-input">
+                            <label class="custom-control-label" for="method-radio-3"></label>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <img alt="Image" src="assets/img/logo-payment-paypal.svg" class="avatar rounded-0" />
+                        </div>
+                        <div class="col d-flex align-items-center">
+                            <span>david.whittaker@pipeline.io</span>
+
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-primary">
+                            Manage account
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+                </form>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+    requestPassCheck = async (oldPass, submitForm) => {
+        /* Check OLD PASSWORD */
+        let response = await fetch("/users/check-user-pass/" + document.querySelector("#oldPassword").value)
+        let result = await response.json()
+        console.log(result)
+        result = result.result
+        if (!result){
+            alert("The old password is incorrect!")
+        }
+
+        if (result) submitForm() 
+    }
+
+    function checkPassword(form) {
+        let newPassword1 = document.querySelector('#newPassword1').value
+        let newPassword2 = document.querySelector('#newPassword2').value
+
+        if (newPassword1 != newPassword2){
+            alert("The confirmation password is different form the new one")
+            return false
+        }
+
+
+
+        if (document.querySelector("#oldPassword") != null ) {
+            let oldPass = document.querySelector("#oldPassword").value
+            /* Check OLD PASSWORD */
+            requestPassCheck(oldPass, function() { // callback function
+                form.submit();
+            });
+        }else{
+            form.submit()
+        }
+
+
+        
+        return false;
+    }
+</script>
+{% endblock %}
+

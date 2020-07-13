@@ -1,6 +1,4 @@
-#main-content{
-    padding-top: 40px;
-}
+
 
 
 html{ height:100%; }
@@ -26,6 +24,10 @@ body::after {
   height: 50px;
 }
 
+.my-form-error {
+  color: #fd5d5d;
+}
+
 /* ---------------------------------------- */
 
 button.btn-link {
@@ -40,3 +42,18 @@ button.btn-link {
 }
 
 button.btn-link:hover{ text-decoration: none}
+
+
+/* ---------------  ACCOUNT -------------- */
+
+#account-nav{
+  border-radius: 0.5rem;
+  background: rgb(233, 236, 239);
+  border-color: #dddfeb #dddfeb #fff;
+  border: 1px;
+  font-size: 0.93rem;
+}
+
+
+#account-nav .nav-link{ border: none; color: #6e707e;}
+#account-nav .nav-link.active{ background-color: white; color: #4e73df;}

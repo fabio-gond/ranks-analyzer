@@ -48,20 +48,22 @@
               <p style="color:red; text-align:center; padding-top: 10px" id="errorMessage"></p>
 
               <div class="form-label-group">
-                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address"
+                <input type="email" name="email" maxlength="64" id="inputEmail" class="form-control" placeholder="Email address"
                   required autofocus>
                 <label for="inputEmail">Email address</label>
               </div>
 
               <div class="form-label-group">
                 <input type="password" name="password1" id="inputPassword" class="form-control" placeholder="Password"
-                  required>
+                minlength="8" maxlength="32" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"  
+                required>
                 <label for="inputPassword">Password</label>
               </div>
 
               <div class="form-label-group">
                 <input type="password" name="password2" id="inputPasswordRepeat" class="form-control"
-                  placeholder="Password" required>
+                minlength="8" maxlength="32" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"  
+                placeholder="Password" required>
                 <label for="inputPasswordRepeat">Ripeti Password</label>
               </div>
 

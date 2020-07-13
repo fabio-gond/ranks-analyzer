@@ -10,25 +10,17 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from . import views
 from django.contrib.auth.views import LoginView, LogoutView
-
+from django.contrib.auth.decorators import login_required
+from users import views as userViews
 
 urlpatterns = [
-    # Examples:
-    # url(r'^blog/', include('blog.urls', namespace='blog')),
     path('', views.index, name='index'),
-    path('accounts/account', views.account, name='account'),
-    
-    url(r'^login/$', LoginView.as_view(template_name='core/login.html'), name='core_login'),
-    url(r'^logout/$', LogoutView.as_view(), name='core_logout'),
+    path('accounts/account', userViews.account, name='account'),
+    path('accounts/password/change/', login_required(userViews.CustomPasswordChangeView.as_view()), name="account_change_password"),
     path('accounts/', include('allauth.urls')),
+    path('users/', include('users.urls', namespace = 'users')),
+    path('analyze/', include('analyze.urls', namespace = 'analyze')),
     
-    #url(r'account/', include('django.contrib.auth.urls')),
-
-    # provide the most basic login/logout functionality
-    #url(r'^login/$', auth_views.login,
-     #   {'template_name': 'core/login.html'}, name='core_login'),
-    #url(r'^logout/$', auth_views.logout, name='core_logout'),
-
     # enable the admin interface
     url(r'^admin/', admin.site.urls),
 ]
