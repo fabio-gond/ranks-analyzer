@@ -20,7 +20,8 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('users/', include('users.urls', namespace = 'users')),
     path('analyze/', include('analyze.urls', namespace = 'analyze')),
+    path('tools/', include('tools.urls', namespace = 'tools')),
     
     # enable the admin interface
-    url(r'^admin/', admin.site.urls),
+    url(r'^amministra/', admin.site.urls),
 ]

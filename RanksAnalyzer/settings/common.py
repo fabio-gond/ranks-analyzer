@@ -94,6 +94,7 @@ DEFAULT_APPS = [
     # Local
     'users.apps.UsersConfig',
     'analyze.apps.AnalyzeConfig',
+    'tools.apps.ToolsConfig',
 ]
 
 # Crispy Forms
@@ -184,6 +185,7 @@ except IOError:
     except IOError:
         raise Exception('Could not open %s for writing!' % SECRET_FILE)
 
+USE_TZ = True 
 
 #--------------------------   CUSTOM SETTINGS ---------------------------------
 

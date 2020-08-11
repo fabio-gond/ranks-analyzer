@@ -8,6 +8,7 @@ from django.conf import settings
 import csv
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.urls import reverse
+from tools.utils import log
 
 #-------------------- PAGES -------------------
 
@@ -149,6 +150,7 @@ def uploadKeywordsFile(request):
                 "action" : 'upload',
                 "errors" : ['There were errors with the upload. Did you enable the cookies in your browser?']
             }
+            log("Errore no session. Potrebbe aver provato a ricaricare la pagina dopo l'upload o non aver cookies abilitati", request.user, ctx,2)
             return render(request, template, context)
 
         upgradeKeywords = request.session.get('upgradeKeywords')
@@ -187,7 +189,7 @@ def uploadKeywordsFile(request):
             k.delete()
 
         
-
+        log("Keywords caricate con successo", request.user, ctx,0)
         
 
         context = {

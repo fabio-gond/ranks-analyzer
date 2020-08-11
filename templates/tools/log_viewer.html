@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+<h1 class="h3 mb-2 text-gray-800">Logs Viewer</h1>
+<div class="card shadow mb-4" style="margin-top: 20px;">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Datetime</th>
+                    <th scope="col">LOG</th>
+                    <th scope="col">Context</th>
+                    <th scope="col">User</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                {% if log.severity == 0 %}
+                <tr>
+                {% elif log.severity == 1 %}
+                <tr class="table-warning">
+                {% elif log.severity == 2 %}
+                <tr class="table-danger">
+                {% endif %}
+                    <td>{{log.time}}</td>
+                    <td>{{log.log}}</td>
+                    <td>{{log.context}}</td>
+                    <td>{{log.user}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}
