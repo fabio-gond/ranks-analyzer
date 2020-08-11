@@ -183,3 +183,10 @@ except IOError:
             f.write(SECRET_KEY)
     except IOError:
         raise Exception('Could not open %s for writing!' % SECRET_FILE)
+
+
+#--------------------------   CUSTOM SETTINGS ---------------------------------
+
+AVAILABLE_MARKETPLACES = [
+    'IT','UK','DE','FR','IT','ES','NL','JP','IN','AU','SG','AE','TR','US','CA','MX','BR'
+]

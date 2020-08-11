@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block head %}
+<!-- Custom styles for this page -->
+<link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Products</h1>
+<p class="mb-4">Manage your products on Amazon.</p>
+
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateProductsModal">Update Product
+  List</button>
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#updateKeywordsModal">Update Keyword
+  List</button>
+<hr />
+
+<!-- DataTales Example -->
+<div class="card shadow mb-4">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">Amazon Products</h6>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>MP</th>
+            <th>ParentCode</th>
+            <th>ChildCode</th>
+            <th>Asin</th>
+            <th>Keywords</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tfoot>
+          <!-- <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Office</th>
+              <th>Age</th>
+              <th>Start date</th>
+              <th>Salary</th>
+            </tr> -->
+        </tfoot>
+        <tbody>
+          {% for row in table %}
+          <tr>
+            <td>{{ row.mp}}</td>
+            <td>{{ row.parentCode}}</td>
+            <td>{{ row.childCode}}</td>
+            <td>{{ row.asin}}</td>
+            <td style="text-align: center;">{{ row.keywords}}</td>
+            <td></td>
+            <td></td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ---------------- MODALS ------------------------ -->
+<!-- Update Products Modal -->
+<div class="modal fade" id="updateProductsModal" tabindex="-1" role="dialog" aria-labelledby="updateProductsModalLabel"
+  aria-hidden="true">
+  <form action="" id="frmUpdateProducts" method="POST" enctype='multipart/form-data'>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="upload_products_model" />
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateProductsModalLabel">Update product list</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>1. Download a <a href="{% static 'analyze/product_list_model.csv' %}">new product list model</a>
+            {% if not table|length_is:"0"  %}
+            or download your <a href="{% url 'analyze:products' %}/current_products_model">current product list
+              model</a>
+            {% endif %}
+          </p>
+          <hr>
+          <p>2. Upload the model and update the product list</p>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="products_model_file" name="products_model_file"
+              accept=".csv" required>
+            <label class="custom-file-label" for="products_model_file">Upload the product list model</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" id="btnUploadModel">Upload Model</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Update Keywords Modal -->
+<div class="modal fade" id="updateKeywordsModal" tabindex="-1" role="dialog" aria-labelledby="updateKeywordsModalLabel"
+  aria-hidden="true">
+  <form action="{% url 'analyze:products' %}/upload_keywords_file" id="frmUpdateKeywords" method="POST" enctype='multipart/form-data'>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="upload_keywords_model" />
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="updateKeywordsModalLabel">Update keywords list</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Download a <a href="{% static 'analyze/keywords_list_model.csv' %}">new keywords list model</a>, insert the keyword data and upload it to create a new keyword list.</p>
+          <p>CAUTION!! The new keywords will override the old ones and the old keywords not anymore in the list will be deleted with the corresponding rankings.</p>
+          <div class="custom-file">
+            <input type="file" class="custom-file-input" id="keywords_model_file" name="keywords_model_file"
+              accept=".csv" required>
+            <label class="custom-file-label" for="keywords_model_file">Upload the keywords list</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" id="btnUploadModel">Upload Model</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Page level plugins -->
+<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+<script>
+  // Call the dataTables jQuery plugin
+  $(document).ready(function () {
+    $('#dataTable').DataTable({
+      "ordering": false
+    });
+  });
+</script>
+<script>
+  /* const reader = new FileReader()
+  reader.onload = event => console.log(event.target.result) // desired file content
+  reader.onerror = error => reject(error) */
+
+  const csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value
+  const btnUploadModel = document.getElementById("btnUploadModel")
+  let submitConfirmed = false
+  const checkUploadModel = (file) => {
+    var formData = new FormData();
+
+    // add assoc key values, this will be posts values
+    formData.append("products_model_file", file);
+    formData.append("csrfmiddlewaretoken", csrftoken);
+
+    fetch("{% url 'analyze:products' %}/check_products_file", { // Your POST endpoint
+      method: 'POST',
+      body: formData // This is your file object
+    }).then(
+      response => response.json() // if the response is a JSON object
+    ).then(
+      result => {
+        if (result.error) {
+          alert(result.error)
+        }
+        else {
+          console.log(result)
+          parentsToDelete = result.parentsToDelete
+          variantsToDelete = result.variantsToDelete
+
+          if (parentsToDelete.length > 0 || variantsToDelete.length > 0) {
+            msg = "If you continue all these products will be deleted from our database with all the previously saved values and it will not be possible to recover the data. "
+
+            if (parentsToDelete.length > 0) {
+              msg += "\n\nParent Products:"
+              parentsToDelete.forEach(parent => {
+                msg += "\nASIN: " + parent.asin + " - MP: " + parent.marketplace
+              });
+            }
+
+            if (variantsToDelete.length > 0) {
+              msg += "\n\nVariant Products:"
+              variantsToDelete.forEach(variant => {
+                msg += "\nASIN: " + variant.asin + " - MP: " + variant.marketplace
+              });
+            }
+
+            msg += "\n\nAre you sure you want to continue and delete these products?"
+            if (confirm(msg)) {
+              submitConfirmed = true
+              $('#frmUpdateProducts').submit()
+            }
+          }
+          else {
+            submitConfirmed = true
+            $('#frmUpdateProducts').submit()
+          }
+        }
+        
+        btnUploadModel.removeAttribute("disabled")
+      }
+    ).catch(
+      error => {
+        console.log(error)
+        alert(error)
+        } // Handle the error response object
+    );
+  };
+
+  $('#frmUpdateProducts').on('submit', function (e) {
+    if (submitConfirmed) {
+      submitConfirmed = false
+      return
+    }
+    e.preventDefault()
+    btnUploadModel.setAttribute("disabled", "disabled")
+    var files = $('#products_model_file');
+    if (files.length > 0) {
+      prdMdlFile = files[0].files[0]
+      checkUploadModel(prdMdlFile)
+    }
+    //reader.readAsText(files[0].files[0]) // you could also read images and other binaries
+
+  });
+</script>
+<!-- <script src="js/demo/datatables-demo.js"></script> -->
+{% endblock %}

@@ -1,0 +1,5 @@
+﻿,max 32 char,,,
+marketplace,seller_sku,parent_asin,product_asin,type
+DE,PROD_PARENT,,FKFJDSADA,parent
+DE,PROD_VARIANT_01,FKFJDSADA,ADGDSFGDS,variant
+DE,PROD_VARIANT_02,FKFJDSADA,RODSAFOSA,variant

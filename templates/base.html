@@ -51,7 +51,7 @@
     
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">
+                <a class="nav-link" href="{% url 'analyze:products' %}">
                     <i class="fas fa-fw fa-cubes"></i>
                     <span>Products</span>
                 </a>
@@ -275,7 +275,7 @@
     
     
     
-    {% block scripts %}
+    
     <!-- Bootstrap core JavaScript-->
     <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'vendor/jquery/jquery.cookie.js' %}"></script>
@@ -289,6 +289,6 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{% static 'base/js/sb-admin-2.min.js' %}"></script>
-    {% endblock %}
+    {% block scripts %}{% endblock %}
 </body>
 </html>

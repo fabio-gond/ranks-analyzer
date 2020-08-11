@@ -7,7 +7,7 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Field
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm):
         model = CustomUser
-        fields = ('username', 'email')
+        fields = '__all__' #('username', 'email')
 
 class CustomUserChangeForm(UserChangeForm):
 

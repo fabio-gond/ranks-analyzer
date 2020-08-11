@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block head %}
+<!-- Custom styles for this page -->
+<link href="{% static 'vendor/datatables/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Upload Keywords</h1>
+
+{% if action == 'upload' %}
+  {% if errors|length > 0 %}
+  {% for error in errors %}
+  <div class="alert alert-danger">{{ error }}</div>
+  {% endfor %}
+  {% else %}
+  <div class="alert alert-success">Keywords correctly uploaded</div>
+  <p class="mb-4">{{ deleteQty}} keywords have been deleted.</p>
+  <p class="mb-4">{{ newQty }} new keywords have been added to the database.</p>
+  <p class="mb-4">{{ upgradeQty }} keywords have been updated.</p>
+{% endif %}
+
+<a type="button" class="btn btn-primary" href="{% url 'analyze:products' %}">Go Back</a>
+
+{% elif errors|length == 0 %}
+<p class="mb-4">{{ deleteQty}} keywords will be deleted. </p>
+<p class="mb-4">{{ newQty }} new keywords will be added to the database.</p>
+<p class="mb-4">{{ upgradeQty }} keywords will be updated.</p>
+<p>Are you sure you want to continue?</p>
+
+<form action="">
+  <input type="hidden" name="action" value="upload">
+  <a type="button" class="btn btn-secondary" href="{% url 'analyze:products' %}">Go Back</a>
+  <button type="submit" class="btn btn-primary">Continue with Upload</button>
+</form>
+{% else %}
+<p class="mb-4">Errors in the uploaded file!</p>
+
+{% for error in errors %}
+<p style="color: darkred;">{{ error }}</p>
+{% endfor %}
+<a type="button" class="btn btn-primary" href="{% url 'analyze:products' %}">Go Back</a>
+{% endif %}
+
+{% if errors|length == 0 %}
+<div class="card shadow mb-4" style="margin-top: 20px;">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>variant_asins</th>
+            <th>keyword</th>
+            <th>volume</th>
+            <th>importance</th>
+            <th>marketplace</th>
+            <th>new/update/delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for kw in deleteKeywords %}
+          <tr style="background-color: rgb(255, 187, 187); ">
+            <td>{{ kw.asin}}</td>
+            <td>{{ kw.keyword}}</td>
+            <td>{{ kw.volume}}</td>
+            <td>{{ kw.importance}}</td>
+            <td>{{ kw.marketplace}}</td>
+            <td>Delete</td>
+          </tr>
+          {% endfor %}
+
+          {% for kw in newKeywords %}
+          <tr style="background-color: rgb(198, 246, 255); ">
+            <td>{{ kw.asin}}</td>
+            <td>{{ kw.keyword}}</td>
+            <td>{{ kw.volume}}</td>
+            <td>{{ kw.importance}}</td>
+            <td>{{ kw.marketplace}}</td>
+            <td>New</td>
+          </tr>
+          {% endfor %}
+
+          {% for kw in upgradeKeywords %}
+          <tr style="background-color: rgb(221, 255, 198); ">
+            <td>{{ kw.asin}}</td>
+            <td>{{ kw.keyword}}</td>
+            <td>{{ kw.volume}}</td>
+            <td>{{ kw.importance}}</td>
+            <td>{{ kw.marketplace}}</td>
+            <td>Update</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Page level plugins -->
+<script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+<script>
+  // Call the dataTables jQuery plugin
+  $(document).ready(function () {
+    $('#dataTable').DataTable({
+      "ordering": false
+    });
+  });
+</script>
+<script>
+  /* const reader = new FileReader()
+  reader.onload = event => console.log(event.target.result) // desired file content
+  reader.onerror = error => reject(error) */
+
+  const csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value
+  const btnUploadModel = document.getElementById("btnUploadModel")
+  let submitConfirmed = false
+  const checkUploadModel = (file) => {
+    var formData = new FormData();
+
+    // add assoc key values, this will be posts values
+    formData.append("products_model_file", file);
+    formData.append("csrfmiddlewaretoken", csrftoken);
+
+    fetch("{% url 'analyze:products' %}/check_products_file", { // Your POST endpoint
+      method: 'POST',
+      body: formData // This is your file object
+    }).then(
+      response => response.json() // if the response is a JSON object
+    ).then(
+      result => {
+        if (result.error) {
+          alert(result.error)
+        }
+        else {
+          console.log(result)
+          parentsToDelete = result.parentsToDelete
+          variantsToDelete = result.variantsToDelete
+
+          if (parentsToDelete.length > 0 || variantsToDelete.length > 0) {
+            msg = "If you continue all these products will be deleted from our database with all the previously saved values and it will not be possible to recover the data. "
+
+            if (parentsToDelete.length > 0) {
+              msg += "\n\nParent Products:"
+              parentsToDelete.forEach(parent => {
+                msg += "\nASIN: " + parent.asin + " - MP: " + parent.marketplace
+              });
+            }
+
+            if (variantsToDelete.length > 0) {
+              msg += "\n\nVariant Products:"
+              variantsToDelete.forEach(variant => {
+                msg += "\nASIN: " + variant.asin + " - MP: " + variant.marketplace
+              });
+            }
+
+            msg += "\n\nAre you sure you want to continue and delete these products?"
+            if (confirm(msg)) {
+              submitConfirmed = true
+              $('#frmUpdateProducts').submit()
+            }
+          }
+          else {
+            submitConfirmed = true
+            $('#frmUpdateProducts').submit()
+          }
+        }
+
+        btnUploadModel.removeAttribute("disabled")
+      }
+    ).catch(
+      error => {
+        console.log(error)
+        alert(error)
+      } // Handle the error response object
+    );
+  };
+
+  $('#frmUpdateProducts').on('submit', function (e) {
+    if (submitConfirmed) {
+      submitConfirmed = false
+      return
+    }
+    e.preventDefault()
+    btnUploadModel.setAttribute("disabled", "disabled")
+    var files = $('#products_model_file');
+    if (files.length > 0) {
+      prdMdlFile = files[0].files[0]
+      checkUploadModel(prdMdlFile)
+    }
+    //reader.readAsText(files[0].files[0]) // you could also read images and other binaries
+
+  });
+</script>
+<!-- <script src="js/demo/datatables-demo.js"></script> -->
+{% endblock %}
