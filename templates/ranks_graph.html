@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1 class="h3 mb-2 text-gray-800">Amazon Rankings Graph</h1>
+<p class="mb-4">Choose the parent or variant product to visualize.</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="show_rankings_graph">
+  <div class="row">
+    <div class="col-3">
+        <div class="form-group">
+            <label for="prodParentSelect">Parent</label>
+            <select class="form-control" id="prodParentSelect" name="productParent">
+                <option value="">Choose</option>
+                {% for currParent in productParents %}
+                {% if currParent == selParent %}
+                <option value="{{currParent.pk}}" selected>{{currParent.code}}</option>
+                {% else %}
+                <option value="{{currParent.pk}}">{{currParent.code}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="form-group">
+            <label for="productSelect">Variant</label>
+            <select class="form-control" id="productSelect" name="product">
+                <option value="">No selection</option>
+                {% for currVariant in products %}
+                {% if currVariant == selVariant %}
+                <option value="{{currVariant.pk}}" selected>{{currVariant.code}}</option>
+                {% else %}
+                <option value="{{currVariant.pk}}">{{currVariant.code}}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary">Show Graph</button>
+  </div>
+</form>
+
+{% if rankTable is not None %}
+<div class="card shadow mb-4">
+  <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">Amazon Ranking Graph</h6>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Volume</th>
+            <th style="width: 50px;">MP</th>
+            <th style="width: 50px;">Import.</th>
+            {% if viewType == 'parent' %}
+            <th style="width: 50px;">Variant</th>
+            {% endif %}
+            <th style="width: 300px;">Keyword</th>
+            {% for col in dates %}
+            <th>{{col}}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rankTable %}
+            <tr>
+                <th>{{row.volume}}</th>
+                <th>{{row.marketplace}}</th>
+                <th>{{row.importance}}</th>
+                {% if viewType == 'parent' %}
+                <th style="background-color: {{ row.prodColor }};">{{row.prodSKU}}</th>
+                {% endif %}
+                <th>{{row.keyword}}</th>
+                {% for col in dates %}
+                    {% if "/" in col %}
+            <td class="rank-cell" style="background-color : {{ row.cellColor }}">{{ row|get_table_item:col }}</td>
+                    {% else %}
+                    <td>{{ row|get_table_item:col }}</td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    selectedCode = ""
+
+    $("#prodParentSelect").change(function (e) {
+        selectedCode = this.value
+
+        $('#productSelect').html('')
+        $("#productSelect").append($("<option selected = 'selected' />").val("").text("No Selection"));
+
+        fetch("/analyze/api/get_product_variants/" + selectedCode)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(variant => {
+                    $("#productSelect").append($("<option />").val(variant.pk).text(variant.code));
+                });
+            })
+            .catch(error => console.log("Si è verificato un errore!"))
+    })
+
+    $("#productSelect").change(function (e) {
+        selectedCode = this.value
+        if (selectedCode == "") selectedCode = $('#prodParentSelect').val() 
+        console.log(selectedCode)
+    })
+
+</script>
+{% endblock %}

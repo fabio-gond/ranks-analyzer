@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect
-from .models import Product, ProductParent, Keyword
+from .models import Product, ProductParent, Keyword, AmazonRank
 import pandas as pd
 import mimetypes
 from django.conf import settings
@@ -9,6 +9,8 @@ import csv
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.urls import reverse
 from tools.utils import log
+from django.db.models import Q
+import colorsys
 
 #-------------------- PAGES -------------------
 
@@ -325,9 +327,160 @@ def uploadKeywordsFile(request):
 
     return render(request, template, context)
 
+def amazonRanksGraph(request):
+    ctx = "AMZ RANKS GRAPH"
+    template = 'ranks_graph.html'
+    productParents = ProductParent.objects.filter(user = request.user)
+    products = Product.objects.filter(user = request.user)
 
-#----------------- FUNCTIONS ----------------
+    context = {
+        "action": None,
+        "products": products,
+        "productParents": productParents
+    }
 
+    if request.POST.get("action", None) == 'show_rankings_graph':
+        productParentPK = request.POST.get("productParent", None)
+        productPK = request.POST.get("product", None)
+        prod = None
+        prodParent = None
+
+        lastAmazonRanks = []
+        if productPK != "":
+            viewType = 'variant'
+            prod = Product.objects.get(pk = productPK)
+            prodParent = prod.parent
+            prodVariants = [prod]
+            maxDate = AmazonRank.objects.filter(product=prod)
+
+            if maxDate.count() > 0:
+                maxDate = maxDate.latest('day').day
+
+                lastAmazonRanks = AmazonRank.objects.filter(
+                    Q(product=prod) & Q(day=maxDate)).order_by('-keyword__importance')
+                
+                prevDates = AmazonRank.objects.filter(Q(product=prod) & Q(
+                    day__lt=maxDate)).order_by('-day').values('day').distinct()[:15]
+            else: maxDate = None
+        else:
+            viewType = 'parent'
+            prodParent = ProductParent.objects.get(pk = productParentPK)
+
+            prodVariants = Product.objects.filter(parent=prodParent)
+            maxDate = AmazonRank.objects.filter(
+                product__in=prodVariants)
+            
+            if maxDate.count() > 0:
+                maxDate = maxDate.latest('day').day
+
+                ranks = AmazonRank.objects.filter(Q(product__in=prodVariants) & Q(
+                    day=maxDate)).order_by('-keyword__importance')
+                kws = ranks.values('keyword__keyword').distinct()
+
+                
+                for kw in kws:
+                    currRanks = ranks.filter(keyword__keyword=kw['keyword__keyword'])
+                    if currRanks.count() > 0:
+                        t = None
+                        for currRank in currRanks:
+                            if t == None:
+                                t = currRank
+                                continue
+                            if (t.rank < currRank.rank and t.rank != 0) or currRank.rank == 0:
+                                t = t
+                            else:
+                                t = currRank
+                        lastAmazonRanks.append(t)
+                prevDates = AmazonRank.objects.filter(
+                    Q(product__in=prodVariants) & Q(day__lt=maxDate)).order_by('-day').values('day').distinct()[:10]
+            else:
+                maxDate = None
+
+        # ---------------- COLORS ----------
+        colors = ['#FFCCCC', '#FFFFCC', '#CCFFFF', '#99FFCC',
+                '#FFCCFF', '#CCFFCC', '#FFE5CC', '#FF66B2',
+                '#66FFB2', '#FFFF66', '#FF66FF', '#FF9933',
+                '#FF6666', '#CC0066', '#00CCCC', '#CCCC00',
+                '#CC6600', '#CC0000', '#00CC00', '#6666FF',
+                '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+                '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+                '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+                '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+                '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+                ]
+        prodColors = {}
+        for i in range(0, len(prodVariants)):
+            prodColors[prodVariants[i].asin] = colors[i]
+        
+        rankTable = []
+
+        dates = []
+        
+        if maxDate is not None:
+            dates.append(maxDate.strftime("%d/%m/%Y"))
+
+            for prevDate in prevDates:
+                dates.append(prevDate["day"].strftime("%d/%m/%Y"))
+        
+            variantRanks = list(AmazonRank.objects.filter(product__in=prodVariants , day__in=prevDates).values('product__pk','day','keyword__keyword','rank')) #_list
+        
+
+            for lastRank in lastAmazonRanks:
+                rgb = colorsys.hsv_to_rgb((300 - lastRank.rank) / 900., 1.0, 1.0)
+                rgbList = [round(255*x) for x in rgb]
+                cellColor = "rgb(" + str(rgbList[0]) + "," + str(rgbList[1]) + "," + str(rgbList[2]) + ")"
+
+                row = {
+                    "volume": lastRank.keyword.volume,
+                    "marketplace": lastRank.keyword.marketplace,
+                    "keyword": lastRank.keyword.keyword,
+                    "importance": lastRank.keyword.importance,
+                    "prodSKU": lastRank.product.code if lastRank.rank != 0 else '',
+                    "prodColor": prodColors[lastRank.product.asin] if lastRank.rank != 0 else 'inherit',
+                    lastRank.day.strftime("%d/%m/%Y"): lastRank.rank,
+                    "cellColor" : cellColor
+                }
+                
+                tempRanks = list(filter(lambda d: d['keyword__keyword'] == lastRank.keyword.keyword, variantRanks))
+                
+
+                for prevDate in prevDates:
+                    prevRank = None
+                    for variant in prodVariants:
+                        rank = list(filter(lambda d: d['product__pk'] == variant.id and d['day'] == prevDate["day"], tempRanks))
+                        if len(rank) == 0: continue
+                        rank = rank[0]
+
+                        if prevRank == None:
+                            prevRank = rank
+                        else:
+                            if rank['keyword__keyword'] == prevRank['keyword__keyword']:
+                                if (rank['rank'] < prevRank['rank'] and rank['rank'] != 0) or prevRank['rank'] == 0:
+                                    prevRank = rank
+                    if prevRank is not None:
+                        row[prevDate["day"].strftime("%d/%m/%Y")] = prevRank['rank']
+
+                rankTable.append(row)
+        
+        if prodParent is not None:
+            products = Product.objects.filter(parent = prodParent)
+        else: products = None
+        context = {
+            "action": 'show_rankings_graph',
+            "products": products,
+            "productParents": productParents,
+            "selParent": prodParent,
+            "selVariant": prod,
+            "rankTable": rankTable,
+            "dates": dates,
+            "viewType": viewType
+        }
+
+    
+    
+    return render(request, template, context)
+
+#----------------- API ----------------
 
 # Controllo il file CSV dei prodotti da caricare e se inEditing == True eseguo gli aggiornamenti sul database
 def checkProductsFile(request, inEditing = False):
@@ -437,4 +590,7 @@ def checkProductsFile(request, inEditing = False):
         "parentsToDelete" : parentsToDelete,
         "variantsToDelete" : variantsToDelete
         })
+
+def apiGetProductVariant(request, pk):
+    return JsonResponse( list(Product.objects.filter(parent__pk = pk, user = request.user).values("pk","code")), safe=False )
 
