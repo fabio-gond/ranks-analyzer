@@ -56,8 +56,8 @@
       <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
         <thead>
           <tr>
-            <th>Volume</th>
             <th style="width: 50px;">MP</th>
+            <th style="width: 50px;">Volume</th>
             <th style="width: 50px;">Import.</th>
             {% if viewType == 'parent' %}
             <th style="width: 50px;">Variant</th>
@@ -71,15 +71,15 @@
         <tbody>
           {% for row in rankTable %}
             <tr>
-                <th>{{row.volume}}</th>
-                <th>{{row.marketplace}}</th>
-                <th>{{row.importance}}</th>
-                {% if viewType == 'parent' %}
-                <th style="background-color: {{ row.prodColor }};">{{row.prodSKU}}</th>
-                {% endif %}
-                <th>{{row.keyword}}</th>
-                {% for col in dates %}
-                    {% if "/" in col %}
+              <th>{{row.marketplace}}</th>
+              <th>{{row.volume}}</th>
+              <th>{{row.importance}}</th>
+              {% if viewType == 'parent' %}
+              <th style="background-color: {{ row.prodColor }};">{{row.prodSKU}}</th>
+              {% endif %}
+              <th>{{row.keyword}}</th>
+              {% for col in dates %}
+                  {% if "/" in col %}
             <td class="rank-cell" style="background-color : {{ row.cellColor }}">{{ row|get_table_item:col }}</td>
                     {% else %}
                     <td>{{ row|get_table_item:col }}</td>

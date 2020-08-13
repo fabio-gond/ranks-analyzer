@@ -31,9 +31,9 @@ def account(request):
           oldEmail = user.email
 
           if accountInfoForm.is_valid():
-               email = accountInfoForm.cleaned_data.get("email")
+               #email = accountInfoForm.cleaned_data.get("email")
 
-               if email != oldEmail and CustomUser.objects.filter(email=email):
+               """ if email != oldEmail and CustomUser.objects.filter(email=email):
                     print("alerta")
                     alerts.append({"type" : "danger", "text": "Email already exists." })
                else:
@@ -45,7 +45,9 @@ def account(request):
                          emailObj.save()
                     except Exception as e:
                          pass
-                    alerts.append({"type" : "success", "text": "Profile data succesfully updated" })
+                    alerts.append({"type" : "success", "text": "Profile data succesfully updated" }) """
+               
+               accountInfoForm.save()
           else:
                print("Form non valid")
                print(accountInfoForm.errors)

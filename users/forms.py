@@ -20,7 +20,7 @@ class AccountInfoForm(forms.ModelForm):
         #label='',
         widget=forms.TextInput(attrs={'maxlength': '32'})
     )
-    email = forms.CharField(widget=forms.EmailInput(attrs={'maxlength': '64'}))
+    #email = forms.CharField(widget=forms.EmailInput(attrs={'maxlength': '64','disabled':'disabled'}))
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,11 +37,11 @@ class AccountInfoForm(forms.ModelForm):
     
     class Meta:
         model = CustomUser
-        fields = ['first_name','last_name','email']
+        fields = ['first_name','last_name']
     
     def clean(self):
         cleaned_data = super(AccountInfoForm, self).clean()
-        email = cleaned_data.get("email")
+        #email = cleaned_data.get("email")
         
         """ if CustomUser.objects.filter(email=email):
             raise forms.ValidationError('Email already exists.') """
