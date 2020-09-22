@@ -10,7 +10,7 @@ class CustomUserAdmin(UserAdmin):
     form = CustomUserChangeForm
     model = CustomUser
     list_display = ['email', 'username',]
-    fieldsets = UserAdmin.fieldsets + ( (('Other'), {'fields': ('platform','other','subscription')}), )
+    fieldsets = UserAdmin.fieldsets + ( (('Other'), {'fields': ('platform','other','plan','plan_current_checkout','plan_paid_until','stripe_email','stripe_cust_id','stripe_checkout_session_id')}), )
     """ fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (('Personal Info'), {'fields': ('first_name', 'last_name', 'email','friends')}),

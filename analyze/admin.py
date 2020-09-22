@@ -18,8 +18,8 @@ class KeywordAdmin(admin.ModelAdmin):
         return obj.product.pk
 
 class AmazonRankAdmin(admin.ModelAdmin):
-    list_display = ('keyword', 'day', 'indexed','rank','amazon_choice')
-    list_filter = ('amazon_choice',)
+    list_display = ('product','keyword', 'day', 'indexed','rank','amazon_choice')
+    list_filter = ('product','amazon_choice',)
 
 
 

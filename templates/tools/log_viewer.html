@@ -14,8 +14,8 @@
             <thead>
                 <tr>
                     <th scope="col">Datetime</th>
-                    <th scope="col">LOG</th>
                     <th scope="col">Context</th>
+                    <th scope="col">LOG</th>
                     <th scope="col">User</th>
                 </tr>
             </thead>
@@ -29,8 +29,8 @@
                 <tr class="table-danger">
                 {% endif %}
                     <td>{{log.time}}</td>
-                    <td>{{log.log}}</td>
                     <td>{{log.context}}</td>
+                    <td>{{log.log}}</td>
                     <td>{{log.user}}</td>
                 </tr>
                 {% endfor %}

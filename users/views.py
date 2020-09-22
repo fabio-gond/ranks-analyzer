@@ -7,6 +7,12 @@ from django.shortcuts import redirect
 from .models import CustomUser
 from allauth.account.models import EmailAddress
 from .forms import AccountInfoForm
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings # new
+from stripe_api.models import Plan, OneTimeProduct
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from datetime import date
 
 #------------------------------  API ------------------------------------
 
@@ -16,14 +22,16 @@ def checkUserPass(request, password):
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
      success_url = reverse_lazy('account')
 
+@login_required
 def account(request):
      user = request.user
+     """ 
      if not request.user.is_authenticated:
-          return redirect('account_login')    
+          return redirect('account_login')  """   
 
      template = 'account/account.html'
      action = request.POST.get('action', None)
-     accountInfoForm = AccountInfoForm(instance = user)
+     accountInfoForm = AccountInfoForm(instance = request.user)
      alerts = []
 
      if action == 'update-account-info':
@@ -116,4 +124,45 @@ def accountOLD(request):
      }
      return render(request, template, context)
 
+def subscriptions(request):
+     template = 'account/subscriptions.html'
+
+     userPlan = request.user.plan
+     userOneTime = request.user.one_time_product
+
+     planPaidUntil = request.user.plan_paid_until
+     oneTimePaidUntil = request.user.one_time_paid_until
+
+     stripePlans = Plan.objects.all()
+     plans = {}
+     for plan in stripePlans:
+          plans[plan.code]= plan
+     
+     stripeOneTime = OneTimeProduct.objects.all()
+     oneTimeProds = {}
+     for prod in stripeOneTime:
+          oneTimeProds[prod.code]= prod
+
+     if oneTimePaidUntil == None or oneTimePaidUntil <= date.today():
+          userOneTime = None
+     
+     context = {
+          "plans" : plans,
+          "oneTimeProds" : oneTimeProds,
+          "userPlan" : userPlan,
+          "userOneTime" : userOneTime,
+     }
+     return render(request, template, context)
+
+def succesfulSubscription(request):
+     template = 'account/subscription_success.html'
+     
+     if request.GET.get("stripe_session_id", None) is not None:
+          print("Pagamento ricevuto")
+          print(request.GET.get("stripe_session_id", None))
+
+     context = {
+         
+     }
+     return render(request, template, context)
 

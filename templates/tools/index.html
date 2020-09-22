@@ -8,6 +8,66 @@
 {% block content %}
 <!-- Page Heading -->
 <h1 class="h3 mb-2 text-gray-800">Tools</h1>
+
+{% if action is not None %}
+    {% if success %}
+        <div class="alert alert-success">Action made succesfully</div>
+        {% else %}
+        <div class="alert alert-success">Action was not completed because of these errors</div>
+    {% endif %}
+    {% if message != None %}
+    <div class="alert alert-primary">{{ message }}</div>
+    {% endif %}
+    {% for error in errors %}
+    <p style="color: red; font-weight: bold;">{{ error }}</p>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-6">
+        <h4>Keyword Tracker</h4>
+
+        <form action="" method="post" enctype="multipart/form-data" onsubmit="return checkAsinForUpload()">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="upload-kw" />
+            <input type="hidden" id="myCodeInpKw" name="myCode" value="" />
+            <p>Carica file di Keywords</p>
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="kw-file" name="kw-file"
+                        aria-describedby="inputGroupFileAddon04">
+                    <label class="custom-file-label" for="kw-file">File di keywords</label>
+                </div>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit"
+                        id="inputGroupFileAddon04">Carica</button>
+                </div>
+            </div>
+        </form>
+        <br />
+        <form action="" method="post" enctype="multipart/form-data" >
+            <!-- {% url 'tools:load_scraped_ranks' %} -->
+            {% csrf_token %}
+            <input type="hidden" name="action" value="upload-ranks-rankanalyzer" />
+            <p>Carica file di Results da RANKANALYZER</p>
+            <div class="row">
+                <div class="col">
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="ranks-file" name="ranks_file.xlsx"
+                                aria-describedby="inputGroupFileAddon1">
+                            <label class="custom-file-label" for="ranks-file">File di Ranking Results</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit"
+                                id="inputGroupFileAddon1">Carica</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

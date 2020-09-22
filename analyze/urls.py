@@ -11,5 +11,6 @@ urlpatterns = [
     path('products/check_products_file', views.checkProductsFile),
     path('products/upload_keywords_file', views.uploadKeywordsFile),
     path('ranks_graph', views.amazonRanksGraph, name='ranks_graph'),
+    path('ranks_graph/detail/<str:viewType>/<str:asin>/<str:marketplace>/<int:day>/<int:month>/<int:year>', views.amazonRanksDateDetail),
     path('api/get_product_variants/<int:pk>', views.apiGetProductVariant),
 ]

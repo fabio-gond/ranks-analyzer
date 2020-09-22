@@ -67,8 +67,8 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465 #587
-EMAIL_HOST_USER = DEFAULT_FROM_EMAIL = 'mail'
-EMAIL_HOST_PASSWORD = 'pass'
+EMAIL_HOST_USER = DEFAULT_FROM_EMAIL = 'Febio <info.febio@gmail.com>'
+EMAIL_HOST_PASSWORD = 'Osvaldo1988@'
 #---------------------------------------------------------
 
 

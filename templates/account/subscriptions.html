@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Subscription" %}{% endblock %}
+
+{% block head %}
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+<!-- <section>
+    <p class="title">Pricing Plans</p>
+    <div class="columns">
+      {% for product in products %}
+        <div class="column">
+          <p class="subtitle">{{ product.name }}</p>
+          {% for plan in product.plan_set.all %}
+            <div>
+              <p class="heading">{{ plan.nickname }}</p>
+              <p>{{ plan.human_readable_price }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </section> -->
+<section class="pricing py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <ul class="nav nav-tabs nav-justified">
+                    <li class="nav-item ">
+                        <a class="nav-link active" data-toggle="tab" href="#subscription" aria-controls="subscription" aria-selected="true">Subscription</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-toggle="tab" href="#onetime" aria-controls="onetime" aria-selected="false">Product Launch</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" role="tabpanel" id="subscription">
+                    <div class="row">
+                        <!-- Basic Tier -->
+                        {% with plans.basic as plan %}
+                        <div class="col-lg-3">
+                            <div class="card mb-5 mb-lg-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted text-uppercase text-center">{{ plan.name }}</h5>
+                                    <h6 class="card-price text-center">${{ plan.price }}<span class="period">/month</span></h6>
+                                    <hr>
+                                    <ul class="fa-ul">
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>{{ plan.kwds_qty }} keywords</li>
+                                        {% if plan.days_step == 1 %}
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every day</li>
+                                        {% else %}
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every {{ plan.days_step }} days</li>
+                                        {% endif %}
+                                        <li class="text-muted"><span class="fa-li"><i class="fas fa-times"></i></span>Amazon's Choice Check</li>
+                                        <li class="text-muted"><span class="fa-li"><i class="fas fa-times"></i></span>Top Seller Check</li> 
+                                    </ul>
+                                    {% if userPlan.code == 'basic' %}
+                                    <button class="btn btn-block btn-secondary text-uppercase" disabled>Active</button>
+                                    {% else %}
+                                    <button class="btn btn-block btn-primary text-uppercase" onclick="activatePlan('subscription','{{ plan.price_id }}')">Activate</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        <!-- Standard Tier -->
+                        {% with plans.standard as plan %}
+                        <div class="col-lg-3">
+                            <div class="card mb-5 mb-lg-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted text-uppercase text-center">{{ plan.name }}</h5>
+                                    <h6 class="card-price text-center">${{ plan.price }}<span class="period">/month</span></h6>
+                                    <hr>
+                                    <ul class="fa-ul">
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>{{ plan.kwds_qty }} keywords</li>
+                                        {% if plan.days_step == 1 %}
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every day</li>
+                                        {% else %}
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every {{ plan.days_step }} days</li>
+                                        {% endif %}
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Amazon's Choice Check</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Top Seller Check</li> 
+                                    </ul>
+                                    {% if userPlan.code == 'standard' %}
+                                    <button class="btn btn-block btn-secondary text-uppercase" disabled>Active</button>
+                                    {% else %}
+                                    <button class="btn btn-block btn-primary text-uppercase" onclick="activatePlan('subscription','{{ plan.price_id }}')">Activate</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        <!-- Advanced Tier -->
+                        <div class="col-lg-3">
+                            <div class="card mb-5 mb-lg-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted text-uppercase text-center">Advanced</h5>
+                                    <h6 class="card-price text-center">$10.00<span class="period">/month</span></h6>
+                                    <hr>
+                                    <ul class="fa-ul">
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>2000 keywords</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every 3 days</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Amazon's Choice Check</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Top Seller Check</li> 
+                                    </ul>
+                                    <button class="btn btn-block btn-primary text-uppercase" onclick="activatePlan()">Button</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Pro Tier -->
+                        <div class="col-lg-3">
+                            <div class="card mb-5 mb-lg-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted text-uppercase text-center">Pro</h5>
+                                    <h6 class="card-price text-center">$20.00<span class="period">/month</span></h6>
+                                    <hr>
+                                    <ul class="fa-ul">
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>5000 keywords</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every 3 days</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Amazon's Choice Check</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Top Seller Check</li> 
+                                    </ul>
+                                    <button class="btn btn-block btn-primary text-uppercase" onclick="activatePlan()">Activate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" role="tabpanel" id="onetime">
+                    <div class="row">
+                        <div class="col-lg-4"></div>
+                        <!-- Product Launch Tier -->
+                        {% with oneTimeProds.launch as prod %}
+                        <div class="col-lg-4">
+                            <div class="card mb-5 mb-lg-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted text-uppercase text-center">{{ prod.name }}</h5>
+                                    <h6 class="card-price text-center">${{ prod.price }}<span class="period"></span></h6>
+                                    <hr>
+                                    <ul class="fa-ul">
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>{{ prod.kwds_qty }} keywords</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Every day for 1 Month</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Amazon's Choice Check</li>
+                                        <li><span class="fa-li"><i class="fas fa-check"></i></span>Top Seller Check</li> 
+                                    </ul>
+                                    {% if userOneTime.code == 'launch' %}
+                                    <button class="btn btn-block btn-secondary text-uppercase" disabled>Active</button>
+                                    {% else %}
+                                    <button class="btn btn-block btn-primary text-uppercase" onclick="activatePlan('payment','{{ prod.price_id }}')">Purchase</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+let stripe = null
+
+fetch("/stripe_api/config")
+    .then((result) => { return result.json(); })
+    .then((data) => {
+    // Initialize Stripe.js
+    stripe = Stripe(data.publicKey);
+    });
+
+activatePlan = (mode, price_id) => {
+    fetch("/stripe_api/create-checkout-session/" + mode + "/" + price_id)
+    .then((result) => { return result.json(); })
+    .then((data) => {
+      console.log(data);
+      // Redirect to Stripe Checkout
+      return stripe.redirectToCheckout({sessionId: data.sessionId})
+    })
+    .then((res) => {
+      console.log(res);
+    });
+}
+
+</script>
+{% endblock %}

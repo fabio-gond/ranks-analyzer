@@ -11,6 +11,7 @@ from django.urls import reverse
 from tools.utils import log
 from django.db.models import Q
 import colorsys
+from datetime import date, datetime
 
 #-------------------- PAGES -------------------
 
@@ -362,6 +363,9 @@ def amazonRanksGraph(request):
                 prevDates = AmazonRank.objects.filter(Q(product=prod) & Q(
                     day__lt=maxDate)).order_by('-day').values('day').distinct()[:15]
             else: maxDate = None
+
+            selAsin = prod.asin
+            selMP = prod.marketplace
         else:
             viewType = 'parent'
             prodParent = ProductParent.objects.get(pk = productParentPK)
@@ -395,6 +399,9 @@ def amazonRanksGraph(request):
                     Q(product__in=prodVariants) & Q(day__lt=maxDate)).order_by('-day').values('day').distinct()[:10]
             else:
                 maxDate = None
+            
+            selAsin = prodParent.asin
+            selMP = prodParent.marketplace
 
         # ---------------- COLORS ----------
         colors = ['#FFCCCC', '#FFFFCC', '#CCFFFF', '#99FFCC',
@@ -426,9 +433,14 @@ def amazonRanksGraph(request):
         
 
             for lastRank in lastAmazonRanks:
-                rgb = colorsys.hsv_to_rgb((300 - lastRank.rank) / 900., 1.0, 1.0)
+                #- Cell Color
+                rank = lastRank.rank
+                if lastRank.rank == 0:
+                    rank = 300
+                rgb = colorsys.hsv_to_rgb((300 - rank) / 900., 1.0, 1.0)
                 rgbList = [round(255*x) for x in rgb]
                 cellColor = "rgb(" + str(rgbList[0]) + "," + str(rgbList[1]) + "," + str(rgbList[2]) + ")"
+                #-----------------
 
                 row = {
                     "volume": lastRank.keyword.volume,
@@ -464,13 +476,17 @@ def amazonRanksGraph(request):
         
         if prodParent is not None:
             products = Product.objects.filter(parent = prodParent)
-        else: products = None
+        else: 
+            products = None
+
         context = {
             "action": 'show_rankings_graph',
             "products": products,
             "productParents": productParents,
             "selParent": prodParent,
             "selVariant": prod,
+            "selAsin" : selAsin,
+            "selMP" : selMP,
             "rankTable": rankTable,
             "dates": dates,
             "viewType": viewType
@@ -478,6 +494,91 @@ def amazonRanksGraph(request):
 
     
     
+    return render(request, template, context)
+
+def amazonRanksDateDetail(request,viewType,asin,marketplace,day,month,year):
+    ctx = "AMZ RANKS DATE DETAIL"
+    template = 'ranks_date_detail.html'
+
+    dateString = str(day) + "/" + str(month) + "/" + str(year)
+    day = datetime.strptime( dateString, '%d/%m/%Y')
+
+    amazonRanks = []
+    if viewType == "variant":
+        prod = Product.objects.get(asin = asin, marketplace = marketplace, user = request.user)
+        prodParent = prod.parent
+        prodVariants = [prod]
+        amazonRanks = AmazonRank.objects.filter(Q(product=prod) & Q(day=day)).order_by('-keyword__importance')
+    else:
+        viewType = 'parent'
+        prodParent = ProductParent.objects.get(asin = asin, marketplace = marketplace, user = request.user)
+        prodVariants = Product.objects.filter(parent=prodParent, marketplace = marketplace, user = request.user)
+    
+        ranks = AmazonRank.objects.filter(Q(product__in=prodVariants) & Q(
+            day=day)).order_by('-keyword__importance')
+        kws = ranks.values('keyword__keyword').distinct()
+
+        for kw in kws:
+            currRanks = ranks.filter(keyword__keyword=kw['keyword__keyword'])
+            if currRanks.count() > 0:
+                t = None
+                for currRank in currRanks:
+                    if t == None:
+                        t = currRank
+                        continue
+                    if (t.rank < currRank.rank and t.rank != 0) or currRank.rank == 0:
+                        t = t
+                    else:
+                        t = currRank
+                amazonRanks.append(t)
+
+    # ---------------- COLORS ----------
+    colors = ['#FFCCCC', '#FFFFCC', '#CCFFFF', '#99FFCC',
+            '#FFCCFF', '#CCFFCC', '#FFE5CC', '#FF66B2',
+            '#66FFB2', '#FFFF66', '#FF66FF', '#FF9933',
+            '#FF6666', '#CC0066', '#00CCCC', '#CCCC00',
+            '#CC6600', '#CC0000', '#00CC00', '#6666FF',
+            '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+            '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+            '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+            '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+            '#69A908', '#00C4EB', '#C1A495', '#FFAFE2',
+            ]
+    prodColors = {}
+    for i in range(0, len(prodVariants)):
+        prodColors[prodVariants[i].asin] = colors[i]
+    
+    rankTable = []
+
+    for amazonRank in amazonRanks:
+        if amazonRank.keyword.keyword == 'planner settimanale':
+            print (amazonRank.amazon_choice)
+
+        row = {
+            "volume": amazonRank.keyword.volume,
+            "marketplace": amazonRank.keyword.marketplace,
+            "keyword": amazonRank.keyword.keyword,
+            "importance": amazonRank.keyword.importance,
+            "prodSKU": amazonRank.product.code if amazonRank.rank != 0 else '',
+            "prodColor": prodColors[amazonRank.product.asin] if amazonRank.rank != 0 else 'inherit',
+            "rank": amazonRank.rank,
+            "rank_sponsored" : amazonRank.rank_sponsored,
+            "page" : amazonRank.page,
+            "pos_in_page" : amazonRank.pos_in_page,
+            "pos_in_page_sponsored" : amazonRank.pos_in_page_sponsored,
+            "amazon_choice" : amazonRank.amazon_choice,
+            "top_seller" : amazonRank.top_seller,
+        }
+
+        rankTable.append(row)
+    
+    context = {
+        "rankTable": rankTable,
+        "viewType": viewType,
+        "asin" : asin,
+        "dateString" : dateString
+    }
+
     return render(request, template, context)
 
 #----------------- API ----------------
@@ -504,7 +605,7 @@ def checkProductsFile(request, inEditing = False):
     prodFile = pd.read_csv(prodFile,skiprows=1) #skiprows=1
 
     for i, row in prodFile.iterrows():
-        rowNumber = i+1
+        rowNumber = i+3
         
         if row.marketplace not in settings.AVAILABLE_MARKETPLACES:
             return JsonResponse({ "error" : "Marketplace not correct on row " + str(rowNumber)})
@@ -516,6 +617,7 @@ def checkProductsFile(request, inEditing = False):
         parent_asin = str(row.parent_asin).strip()
         product_asin = str(row.product_asin).strip()
         if product_asin == "" or product_asin == 'nan' or len(product_asin) > 32 :
+            print(row)
             return JsonResponse({ "error" : "product_asin not correct on row " + str(rowNumber)})
         
         

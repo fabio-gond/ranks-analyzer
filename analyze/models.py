@@ -59,7 +59,7 @@ class AmazonRank(models.Model):
     page =  models.SmallIntegerField(null=True, blank=True,default = 0)
     pos_in_page =  models.SmallIntegerField(null=True, blank=True, default = 0)
     pos_in_page_sponsored =  models.SmallIntegerField(null=True, blank=True, default = 0)
-    top_seller = models.CharField(max_length=64, null=True, blank=True)
+    top_seller = models.CharField(max_length=64, default='')
     created_at = models.DateTimeField(auto_now_add=True, null= True)
     updated_at = models.DateTimeField(auto_now=True, null = True)
 

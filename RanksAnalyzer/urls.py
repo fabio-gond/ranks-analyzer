@@ -21,6 +21,7 @@ urlpatterns = [
     path('users/', include('users.urls', namespace = 'users')),
     path('analyze/', include('analyze.urls', namespace = 'analyze')),
     path('tools/', include('tools.urls', namespace = 'tools')),
+    path('stripe_api/', include('stripe_api.urls', namespace = 'stripe_api')),
     
     # enable the admin interface
     url(r'^amministra/', admin.site.urls),

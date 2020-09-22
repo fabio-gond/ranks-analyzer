@@ -3,7 +3,7 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<h1 class="h3 mb-2 text-gray-800">Amazon Rankings Graph</h1>
+<h1 class="h3 mb-2 text-gray-800">Rankings Graph</h1>
 <p class="mb-4">Choose the parent or variant product to visualize.</p>
 
 <form action="" method="POST">
@@ -49,11 +49,12 @@
 {% if rankTable is not None %}
 <div class="card shadow mb-4">
   <div class="card-header py-3">
-    <h6 class="m-0 font-weight-bold text-primary">Amazon Ranking Graph</h6>
+    <h6 class="m-0 font-weight-bold text-primary">Ranking Graph</h6>
   </div>
   <div class="card-body">
+    <p style="font-size: 12px; text-align: right;">Click on a date to see the daily details.</p>
     <div class="table-responsive">
-      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+      <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0" style="font-size: 12px;">
         <thead>
           <tr>
             <th style="width: 50px;">MP</th>
@@ -62,9 +63,9 @@
             {% if viewType == 'parent' %}
             <th style="width: 50px;">Variant</th>
             {% endif %}
-            <th style="width: 300px;">Keyword</th>
+            <th style="width: 200px;">Keyword</th>
             {% for col in dates %}
-            <th>{{col}}</th>
+            <th><a href="{% url 'analyze:ranks_graph' %}/detail/{{viewType}}/{{selAsin}}/{{selMP}}/{{col}}">{{col}}</a></th>
             {% endfor %}
           </tr>
         </thead>
@@ -80,7 +81,7 @@
               <th>{{row.keyword}}</th>
               {% for col in dates %}
                   {% if "/" in col %}
-            <td class="rank-cell" style="background-color : {{ row.cellColor }}">{{ row|get_table_item:col }}</td>
+                <td class="rank-cell">{{ row|get_table_item:col }}</td>
                     {% else %}
                     <td>{{ row|get_table_item:col }}</td>
                     {% endif %}
@@ -123,5 +124,27 @@
         console.log(selectedCode)
     })
 
+
+    //$(".rank-cell").filter(function(){return  $(this).attr("data-value") >=1 && $(this).attr("data-value") <=10}).css("background-color", "red");
+    $(document).ready(() => {
+      // Colore celle
+      rankCells = $(".rank-cell")
+      rankCells.each(function (index, cell) {
+          rank = $(this).text()
+          color = '#f45342'
+          if (rank < 200) color = '#f46e41'
+          if (rank < 100) color = '#F47D41'
+          if (rank < 50) color = '#F69743'
+          if (rank < 40) color = '#F4B741'
+          if (rank < 30) color = '#F4D241'
+          if (rank < 20) color = '#f4f141'
+          if (rank < 10) color = '#bbf441'
+          if (rank < 5) color = '#7cf441'
+          if (rank == 0 || rank == '') color = '#f45342'
+          if (rank.toLowerCase() == 'none') color = 'rgb(218, 218, 218)'
+          $(this).css("background-color",color) 
+      })
+      //----------------------------
+    })
 </script>
 {% endblock %}
